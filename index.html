@@ -12,6 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/favicon-32.png">
+<link rel="stylesheet" href="workout.css">
 <style>
 :root{--bg:#0b0f14;--card:#141b23;--card2:#1b2430;--line:#263241;--txt:#e8eef5;--mut:#8b9bb0;--acc:#a3e635;--acc2:#22c55e;--org:#f97316;--red:#ef4444;--amb:#f59e0b;--blue:#38bdf8}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -137,6 +138,7 @@ input[type=time]{max-width:150px}
       <div class="muted small" id="nextUp" style="margin-top:6px"></div>
     </div>
   </div>
+  <div id="wkCard"></div>
   <div class="card">
     <div class="switch" id="trainToggle">
       <div><b>🏋️ Antrenman günü</b><div class="muted small" id="trainSub"></div></div>
@@ -156,6 +158,9 @@ input[type=time]{max-width:150px}
   <p class="muted small" style="text-align:center;margin-top:18px">Kutucuğa dokun → alındı olarak işaretlenir ve saati kaydedilir. ⓘ ile ürün bilgisi.</p>
 </section>
 
+<!-- ANTRENMAN -->
+<section class="view" id="v-workout"></section>
+
 <!-- AYLIK -->
 <section class="view" id="v-month">
   <div class="card">
@@ -168,7 +173,7 @@ input[type=time]{max-width:150px}
     <div class="legend">
       <span><i style="background:#16a34a"></i>%100</span><span><i style="background:#4d7c0f"></i>%75+</span>
       <span><i style="background:#a16207"></i>%50+</span><span><i style="background:#7c2d12"></i>%1–49</span>
-      <span><i style="background:#3a1d1d"></i>Hiç</span><span><i style="background:var(--org);border-radius:50%"></i>Antrenman</span>
+      <span><i style="background:#3a1d1d"></i>Hiç</span><span><i style="background:var(--org);border-radius:50%"></i>Antrenman günü</span><span>💪 Antrenman yapıldı</span>
     </div>
     <p class="muted small">Geçmiş bir güne dokunarak sonradan işaretleme yapabilirsin.</p>
   </div>
@@ -210,6 +215,8 @@ input[type=time]{max-width:150px}
     <p><b>En güvenilir yol: Takvime ekle.</b> Ayarlar'daki <b>📅 Takvime ekle</b> düğmesi her öğün saati için her gün tekrarlayan bir takvim etkinliği ve alarmı indirir (saatinde + 30 dk sonra). Telefonun takvimi bunları uygulama kapalıyken bile çalar. iPhone'da dosya açılınca <b>Tümünü Ekle</b>'ye dokun.</p>
     <p style="margin-top:8px"><b>Uygulama bildirimleri:</b> Uygulama açıkken ya da arka planda yeni kapatılmışken, saati gelen ve işaretlenmemiş takviye için bildirim gelir, 30 dk sonra hâlâ işaretlenmediyse bir kez daha hatırlatır.</p>
     <p style="margin-top:8px" class="muted"><b>Sınırlar:</b> Uygulama tamamen kapalıyken bildirim gönderebilmek için bir "push sunucusu" gerekir; bu uygulamada sunucu yok, bütün veriler sadece telefonunda durur. iPhone'da web bildirimleri sadece <b>ana ekrana eklenmiş</b> uygulamada ve iOS 16.4+ ile çalışır, iOS arka plandaki uygulamayı kısa sürede durdurur. Bu yüzden asıl hatırlatıcı olarak takvim alarmlarını kullan, uygulamayı da işaretleme ve takip için kullan.</p>
+    <h3>🖼️ Görseller</h3>
+    <p class="muted small">Egzersiz görselleri: <a href="https://github.com/yuhonas/free-exercise-db" style="color:var(--acc)">free-exercise-db</a> (yuhonas), Unlicense / kamu malı. Uygulamanın içinde çevrimdışı çalışacak şekilde paketlendi.</p>
     <h3>💾 Verilerin</h3>
     <p class="muted">Veriler sadece bu telefonda (tarayıcı depolamasında) tutulur. Ayda bir <b>Ayarlar → Yedeği indir</b> ile yedek al. iPhone'da uygulamayı ana ekrandan silersen veriler de silinir.</p>
   </div>
@@ -261,6 +268,7 @@ input[type=time]{max-width:150px}
 
 <nav>
   <button class="on" data-v="today"><span class="ic">✅</span>Bugün</button>
+  <button data-v="workout"><span class="ic">🏋️</span>Antrenman</button>
   <button data-v="month"><span class="ic">📅</span>Aylık</button>
   <button data-v="guide"><span class="ic">📘</span>Rehber</button>
   <button data-v="settings"><span class="ic">⚙️</span>Ayarlar</button>
@@ -269,7 +277,11 @@ input[type=time]{max-width:150px}
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
 <div id="printSheet"></div>
+<div class="player" id="player"></div>
+<div class="pfoot" id="pfoot"></div>
 
+<script src="exercises.js"></script>
+<script src="workout.js"></script>
 <script>
 'use strict';
 const KEY='takviyem_v1', NKEY='takviyem_notified';
@@ -386,6 +398,9 @@ function renderToday(){
     else next=st.pct===100?'🎉 Bugünkü tüm takviyeler tamam!':'';
   }
   $('nextUp').textContent=next;
+  {const pk=Object.keys(PROGRAM).find(x=>PROGRAM[x].dow===d.getDay());const done=hasWorkout(k);
+   $('wkCard').innerHTML=isToday&&(pk||done||W)?`<div class="card row" style="justify-content:space-between;border-color:${done?'#2f5d1f':'var(--org)'}"><div><b>🏋️ ${done?'Antrenman tamam 💪':W?'Antrenman devam ediyor':'Bugün: '+esc(PROGRAM[pk].name)}</b><div class="muted small">${done?'Antrenman sonrası whey\'i unutma':'~'+progMin(PROGRAM[W?W.prog:pk])+' dk · adım adım rehberli'}</div></div><button class="btn ${done?'':'pri'}" id="wkGo">${done?'Özet':W?'Devam':'Başla'}</button></div>`:'';
+   if($('wkGo'))$('wkGo').onclick=()=>{if(W){go('workout');openPlayer();}else go('workout');};}
   $('trainTgl').classList.toggle('on',isTraining(k));
   $('trainSub').textContent='Açıkken antrenman sonrası whey listeye eklenir';
   // su
@@ -456,7 +471,7 @@ function renderMonth(){
   for(let d=1;d<=n;d++){
     const k=keyOf(new Date(mY,mM,d)),fut=k>tk,st=dayStats(k);
     let cls='';if(!fut&&(hasData(k)||k<tk)){cls=st.pct>=100?'p4':st.pct>=75?'p3':st.pct>=50?'p2':st.pct>0?'p1':'p0';}
-    h+=`<div class="d ${cls} ${fut?'fut':''} ${k===tk?'today':''}" data-k="${k}">${isTraining(k)?'<span class="tr"></span>':''}${d}${!fut&&(hasData(k)||k<=tk)?`<small>%${st.pct}</small>`:''}</div>`;
+    h+=`<div class="d ${cls} ${fut?'fut':''} ${k===tk?'today':''}" data-k="${k}">${isTraining(k)?'<span class="tr"></span>':''}${hasWorkout(k)?'<span class="wk">💪</span>':''}${d}${!fut&&(hasData(k)||k<=tk)?`<small>%${st.pct}</small>`:''}</div>`;
   }
   $('cal').innerHTML=h;
   // özet
@@ -465,8 +480,8 @@ function renderMonth(){
   const full=ks.filter(k=>dayStats(k).pct===100).length;
   let best=0,cur=0;for(const k of ks){if(dayStats(k).pct===100){cur++;best=Math.max(best,cur);}else cur=0;}
   const wAvg=ks.length?(ks.reduce((a,k)=>a+(getLog(k).water||0),0)*0.25/ks.length):0;
-  const tr=ks.filter(k=>isTraining(k)).length;
-  $('mStats').innerHTML=[['%'+avg,'ortalama'],[full+'/'+ks.length,'tam gün'],[streak()+' 🔥','güncel seri'],[best,'ayın en iyi serisi'],[wAvg.toLocaleString('tr-TR',{maximumFractionDigits:1})+' L','ort. su'],[tr,'antrenman günü']].map(([a,b])=>`<div class="stat"><b>${a}</b><span class="muted small">${b}</span></div>`).join('');
+  const tr=(S.workouts||[]).filter(w=>w.date.startsWith(`${mY}-${pad(mM+1)}`)).length;
+  $('mStats').innerHTML=[['%'+avg,'ortalama'],[full+'/'+ks.length,'tam gün'],[streak()+' 🔥','güncel seri'],[best,'ayın en iyi serisi'],[wAvg.toLocaleString('tr-TR',{maximumFractionDigits:1})+' L','ort. su'],[tr+' 💪','yapılan antrenman']].map(([a,b])=>`<div class="stat"><b>${a}</b><span class="muted small">${b}</span></div>`).join('');
   // takviye bazında
   $('mSup').innerHTML=S.settings.items.filter(i=>i.active!==false).map(i=>{
     let req=0,tk2=0;for(const k of ks){const inc=itemsFor(k,true).some(x=>x.id===i.id);if(inc){req++;if(getLog(k).taken[i.id])tk2++;}}
@@ -637,7 +652,7 @@ function resetNotifiedToday(){const N=getNotified();delete N[todayKey()];localSt
 function go(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
-  if(v==='today')renderToday();if(v==='month')renderMonth();if(v==='guide')renderGuide();if(v==='settings')renderSettings();
+  if(v==='today')renderToday();if(v==='workout')renderWorkout();if(v==='month')renderMonth();if(v==='guide')renderGuide();if(v==='settings')renderSettings();
   window.scrollTo(0,0);
 }
 document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.v==='today')viewKey=todayKey();go(b.dataset.v);};
@@ -648,7 +663,9 @@ function tick(){const k=todayKey();if(k!==lastDay){if(viewKey===lastDay)viewKey=
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick();});
 setInterval(tick,30000);
 if(location.hash.length>1)go(location.hash.slice(1));else renderToday();
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(r=>navigator.serviceWorker.ready).then(r=>{swReg=r;checkReminders();scheduleTriggers();}).catch(e=>console.warn('SW',e));}
+if('serviceWorker' in navigator){let _rl=false;const _hadCtl=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(_hadCtl&&!_rl&&!(W&&$('player').classList.contains('on'))){_rl=true;location.reload();}});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&swReg)swReg.update().catch(()=>{});});
+  navigator.serviceWorker.register('sw.js').then(r=>navigator.serviceWorker.ready).then(r=>{swReg=r;checkReminders();scheduleTriggers();}).catch(e=>console.warn('SW',e));}
 </script>
 </body>
 </html>
