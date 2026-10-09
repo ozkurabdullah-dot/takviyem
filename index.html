@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Takviyem">
+<title>Takviyem</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png">
+<style>
+:root{--bg:#0b0f14;--card:#141b23;--card2:#1b2430;--line:#263241;--txt:#e8eef5;--mut:#8b9bb0;--acc:#a3e635;--acc2:#22c55e;--org:#f97316;--red:#ef4444;--amb:#f59e0b;--blue:#38bdf8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:16px}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:rgba(11,15,20,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+header h1{font-size:22px;margin:0;font-weight:800;letter-spacing:-.3px;flex:1}
+header h1 span{color:var(--acc)}
+.chip{background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:700;white-space:nowrap}
+main{padding:14px 14px 20px;max-width:640px;margin:0 auto}
+.view{display:none}.view.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:14px}
+.muted{color:var(--mut)}.small{font-size:13px}
+h2{font-size:18px;margin:0 0 10px}h3{font-size:16px;margin:14px 0 6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 18px;border-radius:14px;border:1px solid var(--line);background:var(--card2);color:var(--txt);font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn.pri{background:var(--acc);color:#0b0f14;border-color:var(--acc)}
+.btn.full{width:100%;margin-top:8px}
+.btn.danger{color:var(--red)}
+.row{display:flex;align-items:center;gap:12px}
+.hero{display:flex;align-items:center;gap:18px}
+.ring{position:relative;width:128px;height:128px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .lbl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .lbl b{font-size:30px;font-weight:800}
+.hero .date{font-size:20px;font-weight:800;text-transform:capitalize}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:6px 0;cursor:pointer;user-select:none}
+.tgl{width:58px;height:34px;border-radius:999px;background:#2a3645;position:relative;flex:none;transition:.2s}
+.tgl:after{content:"";position:absolute;top:3px;left:3px;width:28px;height:28px;border-radius:50%;background:#fff;transition:.2s}
+.tgl.on{background:var(--acc2)}.tgl.on:after{left:27px}
+.water{display:flex;align-items:center;gap:12px}
+.water .rb{width:58px;height:58px;border-radius:50%;font-size:30px;font-weight:800;border:1px solid var(--line);background:var(--card2);color:var(--txt);cursor:pointer}
+.water .rb.plus{background:var(--blue);color:#06202d;border-color:var(--blue)}
+.water .mid{flex:1;text-align:center}
+.water .mid b{font-size:26px}
+.glasses{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px}
+.glasses i{width:16px;height:22px;border:2px solid #355; border-radius:3px 3px 6px 6px;display:block}
+.glasses i.f{background:var(--blue);border-color:var(--blue)}
+.grp{margin:20px 4px 8px;font-size:13px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);display:flex;align-items:center;gap:8px}
+.slot{background:var(--card);border:1px solid var(--line);border-radius:20px;margin-bottom:12px;overflow:hidden}
+.slot.due{border-color:var(--org)}
+.slot.done{border-color:#2f5d1f}
+.slothd{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--card2);font-weight:800}
+.slothd .t{font-variant-numeric:tabular-nums;color:var(--acc)}
+.item{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-top:1px solid var(--line);min-height:72px;cursor:pointer;user-select:none}
+.item:first-of-type{border-top:0}
+.cb{width:40px;height:40px;border-radius:12px;border:2.5px solid #4b5b70;flex:none;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#0b0f14;transition:.15s}
+.item.ok .cb{background:var(--acc);border-color:var(--acc)}
+.item .nm{flex:1;min-width:0}
+.item .nm b{display:block;font-size:17px}
+.item.ok .nm b{color:var(--acc)}
+.item .nm span{font-size:14px;color:var(--mut)}
+.info{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--mut);font-size:18px;font-weight:800;font-style:italic;font-family:Georgia,serif;flex:none;cursor:pointer}
+.banner{background:#3b2a0c;border:1px solid var(--amb);color:#fde68a;border-radius:16px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;background:rgba(15,20,27,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:0;color:var(--mut);padding:10px 0 8px;font-size:12px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:64px;cursor:pointer}
+nav button .ic{font-size:22px;line-height:1}
+nav button.on{color:var(--acc)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal .h{text-align:center;font-size:12px;color:var(--mut);font-weight:700;padding-bottom:2px}
+.cal .d{aspect-ratio:1;border-radius:12px;background:#1a222c;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:15px;cursor:pointer;position:relative;border:2px solid transparent}
+.cal .d small{font-size:10px;font-weight:700;opacity:.85}
+.cal .d.p0{background:#3a1d1d}.cal .d.p1{background:#7c2d12}.cal .d.p2{background:#a16207}.cal .d.p3{background:#4d7c0f}.cal .d.p4{background:#16a34a;color:#04130a}
+.cal .d.fut{opacity:.35;cursor:default}
+.cal .d.today{border-color:#fff}
+.cal .d .tr{position:absolute;top:4px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--org)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--card2);border-radius:14px;padding:12px;text-align:center}
+.stat b{display:block;font-size:24px;color:var(--acc)}
+.bar{height:10px;background:#263241;border-radius:99px;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:var(--acc)}
+.sup{margin:12px 0}
+.sup .row{justify-content:space-between}
+label.f{display:block;font-size:13px;color:var(--mut);margin:10px 0 4px}
+input,select,textarea{width:100%;min-height:48px;background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px;font-family:inherit}
+input[type=time]{max-width:150px}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.days button{flex:1;min-width:0;padding:0;min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--mut);font-weight:800;font-size:14px;cursor:pointer}
+.days button.on{background:var(--org);border-color:var(--org);color:#1a0a00}
+.ed{border-top:1px solid var(--line);padding:12px 0}
+.ed:first-child{border-top:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:none;align-items:flex-end;justify-content:center}
+.modal.on{display:flex}
+.sheet{background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:640px;max-height:88vh;overflow:auto;padding:20px 18px calc(24px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.sheet h2{font-size:22px}
+.sheet .sec{background:var(--card2);border-radius:14px;padding:12px 14px;margin:10px 0}
+.sheet .sec b{color:var(--acc);display:block;margin-bottom:4px}
+.sheet p{margin:0;line-height:1.45}
+.help p,.help li{line-height:1.5}
+.help ol{padding-left:22px;margin:6px 0}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#fff;color:#000;padding:12px 18px;border-radius:14px;font-weight:700;z-index:30;display:none;max-width:90vw;text-align:center}
+.tag{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;background:#33240f;color:var(--org);margin-left:6px;vertical-align:2px}
+#printSheet{display:none}
+@media print{
+  html,body{background:#fff!important;color:#000;padding:0}
+  header,nav,main,.modal,.toast{display:none!important}
+  #printSheet{display:block;font-family:Arial,sans-serif;color:#000}
+  #printSheet h1{font-size:18px;margin:0 0 4px}
+  #printSheet table{border-collapse:collapse;width:100%;font-size:9px}
+  #printSheet th,#printSheet td{border:1px solid #999;padding:2px;text-align:center}
+  #printSheet td.n{text-align:left;white-space:nowrap;font-weight:bold}
+  @page{size:A4 landscape;margin:10mm}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Takviy<span>em</span></h1>
+  <div class="chip" id="streakChip">🔥 0 gün</div>
+</header>
+
+<main>
+<!-- BUGÜN -->
+<section class="view on" id="v-today">
+  <div id="pastBanner"></div>
+  <div class="card hero">
+    <div class="ring" id="ring"></div>
+    <div>
+      <div class="date" id="todayDate"></div>
+      <div class="muted" id="todaySub"></div>
+      <div class="muted small" id="nextUp" style="margin-top:6px"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="switch" id="trainToggle">
+      <div><b>🏋️ Antrenman günü</b><div class="muted small" id="trainSub"></div></div>
+      <div class="tgl" id="trainTgl"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><b>💧 Su</b><span class="muted small" id="waterTarget"></span></div>
+    <div class="water" style="margin-top:10px">
+      <button class="rb" id="wMinus" aria-label="Bir bardak çıkar">−</button>
+      <div class="mid"><b id="wL">0 L</b><div class="muted small" id="wG">0 bardak</div></div>
+      <button class="rb plus" id="wPlus" aria-label="Bir bardak ekle">+</button>
+    </div>
+    <div class="glasses" id="glasses"></div>
+  </div>
+  <div id="slots"></div>
+  <p class="muted small" style="text-align:center;margin-top:18px">Kutucuğa dokun → alındı olarak işaretlenir ve saati kaydedilir. ⓘ ile ürün bilgisi.</p>
+</section>
+
+<!-- AYLIK -->
+<section class="view" id="v-month">
+  <div class="card">
+    <div class="row" style="justify-content:space-between;margin-bottom:12px">
+      <button class="btn" id="mPrev" aria-label="Önceki ay">‹</button>
+      <h2 id="mTitle" style="margin:0;text-transform:capitalize"></h2>
+      <button class="btn" id="mNext" aria-label="Sonraki ay">›</button>
+    </div>
+    <div class="cal" id="cal"></div>
+    <div class="legend">
+      <span><i style="background:#16a34a"></i>%100</span><span><i style="background:#4d7c0f"></i>%75+</span>
+      <span><i style="background:#a16207"></i>%50+</span><span><i style="background:#7c2d12"></i>%1–49</span>
+      <span><i style="background:#3a1d1d"></i>Hiç</span><span><i style="background:var(--org);border-radius:50%"></i>Antrenman</span>
+    </div>
+    <p class="muted small">Geçmiş bir güne dokunarak sonradan işaretleme yapabilirsin.</p>
+  </div>
+  <div class="card">
+    <h2>Bu ayın özeti</h2>
+    <div class="stats" id="mStats"></div>
+  </div>
+  <div class="card">
+    <h2>Takviye bazında</h2>
+    <div id="mSup"></div>
+  </div>
+  <div class="card">
+    <button class="btn pri full" id="printBtn">🖨️ Aylık çizelgeyi yazdır / PDF</button>
+    <button class="btn full" id="csvBtn">📄 CSV olarak indir</button>
+  </div>
+</section>
+
+<!-- REHBER -->
+<section class="view" id="v-guide">
+  <div class="card"><h2>Ürün rehberi</h2><p class="muted small" style="margin:0">Her ürünün ne işe yaradığı, nasıl ve ne zaman kullanılacağı. Bilgiler genel bilgilendirme amaçlıdır, doktor tavsiyesinin yerini tutmaz.</p></div>
+  <div id="guideList"></div>
+  <div class="card help" id="help">
+    <h2>❓ Yardım ve kurulum</h2>
+    <h3>📱 iPhone'a kurulum</h3>
+    <ol>
+      <li>Bu sayfayı <b>Safari</b>'de aç (Chrome'da değil).</li>
+      <li>Alttaki <b>Paylaş</b> düğmesine (kare ve yukarı ok) dokun.</li>
+      <li><b>Ana Ekrana Ekle</b>'yi seç, sonra <b>Ekle</b>'ye dokun.</li>
+      <li>Uygulamayı artık ana ekrandaki <b>Takviyem</b> simgesinden aç.</li>
+      <li>Bildirimler için uygulamanın içinden <b>Ayarlar → Bildirimlere izin ver</b>'e dokun (iOS 16.4 ve üstü gerekir).</li>
+    </ol>
+    <h3>🤖 Android'e kurulum</h3>
+    <ol>
+      <li>Sayfayı <b>Chrome</b>'da aç.</li>
+      <li>Sağ üstteki <b>⋮</b> menüsünden <b>Ana ekrana ekle</b> ya da <b>Uygulamayı yükle</b>'yi seç.</li>
+      <li>Uygulamayı aç, <b>Ayarlar → Bildirimlere izin ver</b>'e dokun.</li>
+    </ol>
+    <h3>🔔 Hatırlatmalar nasıl çalışır?</h3>
+    <p><b>En güvenilir yol: Takvime ekle.</b> Ayarlar'daki <b>📅 Takvime ekle</b> düğmesi her öğün saati için her gün tekrarlayan bir takvim etkinliği ve alarmı indirir (saatinde + 30 dk sonra). Telefonun takvimi bunları uygulama kapalıyken bile çalar. iPhone'da dosya açılınca <b>Tümünü Ekle</b>'ye dokun.</p>
+    <p style="margin-top:8px"><b>Uygulama bildirimleri:</b> Uygulama açıkken ya da arka planda yeni kapatılmışken, saati gelen ve işaretlenmemiş takviye için bildirim gelir, 30 dk sonra hâlâ işaretlenmediyse bir kez daha hatırlatır.</p>
+    <p style="margin-top:8px" class="muted"><b>Sınırlar:</b> Uygulama tamamen kapalıyken bildirim gönderebilmek için bir "push sunucusu" gerekir; bu uygulamada sunucu yok, bütün veriler sadece telefonunda durur. iPhone'da web bildirimleri sadece <b>ana ekrana eklenmiş</b> uygulamada ve iOS 16.4+ ile çalışır, iOS arka plandaki uygulamayı kısa sürede durdurur. Bu yüzden asıl hatırlatıcı olarak takvim alarmlarını kullan, uygulamayı da işaretleme ve takip için kullan.</p>
+    <h3>💾 Verilerin</h3>
+    <p class="muted">Veriler sadece bu telefonda (tarayıcı depolamasında) tutulur. Ayda bir <b>Ayarlar → Yedeği indir</b> ile yedek al. iPhone'da uygulamayı ana ekrandan silersen veriler de silinir.</p>
+  </div>
+</section>
+
+<!-- AYARLAR -->
+<section class="view" id="v-settings">
+  <div class="card">
+    <h2>🔔 Hatırlatmalar</h2>
+    <p class="muted small" id="notifStatus"></p>
+    <button class="btn pri full" id="notifBtn">Bildirimlere izin ver</button>
+    <button class="btn full" id="testNotif">Deneme bildirimi gönder</button>
+    <label class="f">Hatırlatmayı tekrarla (işaretlenmezse, dakika sonra)</label>
+    <input type="number" id="followMin" min="0" max="180" step="5" inputmode="numeric">
+    <h3>📅 Takvime ekle <span class="tag">EN GÜVENİLİR</span></h3>
+    <p class="muted small" style="margin:0">Her öğün saati için her gün tekrarlayan etkinlik + alarm. Uygulama kapalıyken de çalar.</p>
+    <button class="btn pri full" id="icsBtn">📅 Takvime ekle (ayarlarıma göre)</button>
+    <a class="btn full" href="takviyem.ics" id="icsStatic">📅 Varsayılan saatlerle takvim dosyası</a>
+  </div>
+  <div class="card">
+    <h2>🏋️ Antrenman günleri</h2>
+    <div class="days" id="trainDays"></div>
+    <p class="muted small">Bu günlerde "Antrenman sonrası whey" listeye eklenir. Bugün için Bugün ekranından da değiştirebilirsin.</p>
+  </div>
+  <div class="card">
+    <h2>⏰ Öğün saatleri</h2>
+    <div id="slotEd"></div>
+  </div>
+  <div class="card">
+    <h2>💊 Ürünler ve dozlar</h2>
+    <div id="itemEd"></div>
+    <button class="btn full" id="addItem">+ Yeni ürün ekle</button>
+  </div>
+  <div class="card">
+    <h2>💧 Su hedefi</h2>
+    <label class="f">Günlük hedef (250 ml'lik bardak)</label>
+    <input type="number" id="waterGoal" min="4" max="20" inputmode="numeric">
+  </div>
+  <div class="card">
+    <h2>💾 Yedekleme</h2>
+    <button class="btn full" id="expBtn">⬇️ Yedeği indir (JSON)</button>
+    <button class="btn full" id="impBtn">⬆️ Yedekten geri yükle</button>
+    <input type="file" id="impFile" accept="application/json,.json" style="display:none">
+    <button class="btn full danger" id="resetBtn">Ayarları varsayılana döndür</button>
+    <p class="muted small" style="text-align:center">Takviyem v1 · veriler sadece bu cihazda</p>
+  </div>
+</section>
+</main>
+
+<nav>
+  <button class="on" data-v="today"><span class="ic">✅</span>Bugün</button>
+  <button data-v="month"><span class="ic">📅</span>Aylık</button>
+  <button data-v="guide"><span class="ic">📘</span>Rehber</button>
+  <button data-v="settings"><span class="ic">⚙️</span>Ayarlar</button>
+</nav>
+
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+<div id="printSheet"></div>
+
+<script>
+'use strict';
+const KEY='takviyem_v1', NKEY='takviyem_notified';
+const GROUPS=['Sabah','Öğle','Akşam','Gece'];
+const DOW=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+const DEFAULTS={
+  version:1,
+  trainingDays:[1,2,4,5],
+  waterGoal:12,
+  followMin:30,
+  slots:[
+    {id:'kahvalti',name:'Kahvaltı',time:'08:00',group:'Sabah'},
+    {id:'ara',name:'Ara öğün',time:'10:30',group:'Öğle'},
+    {id:'antrenman',name:'Antrenman sonrası',time:'19:00',group:'Akşam',trainingOnly:true},
+    {id:'aksam',name:'Akşam yemeği',time:'20:00',group:'Akşam'},
+    {id:'gece',name:'Yatmadan önce',time:'23:00',group:'Gece'}
+  ],
+  items:[
+    {id:'kreatin',emoji:'⚡',name:'Kreatin',brand:'Supplementler Micronized',dose:'5 g (1 ölçek)',slot:'kahvalti',
+     what:'Kaslardaki enerji deposunu (fosfokreatin) doldurur. Ağır setlerde daha fazla tekrar ve güç sağlar, zamanla kas gelişimini destekler. En çok araştırılmış ve etkisi kanıtlanmış takviyedir.',
+     how:'5 g\'ı (1 ölçek) su, süt veya whey ile karıştırıp iç. Yükleme yapmana gerek yok. Kreatin kaslara su çeker, günde 2,5–3,5 L su iç. İlk haftalarda 1–2 kg artış normaldir (kasta su, yağ değil).',
+     when:'Her gün kahvaltıda, dinlenme günleri dahil. Saati önemli değil, önemli olan her gün almak.'},
+    {id:'d3k2',emoji:'☀️',name:'D3 + K2',brand:'One Up',dose:'1 tablet',slot:'kahvalti',
+     what:'D vitamini kemik, kas ve bağışıklık sistemi için gereklidir. Türkiye\'de D vitamini eksikliği çok yaygındır ve yorgunluk yapabilir. K2, kalsiyumun kemiklere gitmesine yardım eder.',
+     how:'Günde 1 tablet, yağ içeren bir öğünle (kahvaltı ideal) yutarak al. Fazlası zararlı olabilir, dozu artırma. 2–3 ay sonra kan tahlili ile D vitamini düzeyine baktır.',
+     when:'Her gün kahvaltıda, omega-3 ile birlikte (yağ emilimi artırır).'},
+    {id:'omega3',emoji:'🐟',name:'Omega-3',brand:'Nature\'s Supreme',dose:'1 kapsül',slot:'kahvalti',
+     what:'EPA/DHA yağ asitleri. Kalp ve damar sağlığı, eklemler ve beyin için faydalıdır. Cildin kurumasını ve iltihaplanmayı azaltmaya yardımcı olabilir.',
+     how:'Günde 1 kapsül, yemekle birlikte bol su ile yut. Balık tadı geğirtirse yemeğin ortasında al.',
+     when:'Her gün kahvaltıda.'},
+    {id:'whey1',emoji:'🥤',name:'Whey Protein',brand:'Supplementler · Çikolata',dose:'1 ölçek · 250–300 ml su/süt',slot:'ara',
+     what:'Hızlı sindirilen, kaliteli protein. Kas onarımı ve gelişimi için günlük protein hedefine (140–160 g) ulaşmanı kolaylaştırır. Tüm esansiyel aminoasitleri (BCAA dahil) içerir.',
+     how:'1 ölçeği shaker\'da 250–300 ml su veya süt ile çalkala. Sütle daha kalorili ve lezzetli olur. Yemeğin yerine değil, yemeğe ek olarak iç.',
+     when:'Her gün 10:30 ara öğünde. Antrenman günlerinde antrenmandan sonra 1 ölçek daha.'},
+    {id:'whey2',emoji:'🥤',name:'Whey (antrenman sonrası)',brand:'Supplementler · Çikolata',dose:'1 ölçek · 250–300 ml su/süt',slot:'antrenman',
+     what:'Antrenmandan sonra kaslara protein sağlar, toparlanmayı ve kas gelişimini destekler.',
+     how:'1 ölçeği 250–300 ml su veya süt ile çalkala. Antrenmandan sonraki 1–2 saat içinde iç.',
+     when:'Sadece antrenman günlerinde (varsayılan Pzt, Sal, Per, Cum), antrenmandan sonra.'},
+    {id:'cinko',emoji:'🛡️',name:'Çinko Pikolinat',brand:'One Up · 15 mg',dose:'1 tablet',slot:'aksam',
+     what:'Cilt sağlığı ve bağışıklık için önemli bir mineraldir. Sivilcelerin azalmasına yardımcı olduğu çalışmalarla gösterilmiştir. Etkisi 8–12 haftada görülür.',
+     how:'Günde 1 tablet, yemekle birlikte. Aç karnına alma, mide bulantısı yapabilir. Magnezyumla aynı anda alma (emilimde yarışırlar).',
+     when:'Her gün akşam yemeğinde.'},
+    {id:'magnezyum',emoji:'🌙',name:'Magnezyum Bisglisinat',brand:'Nature\'s Supreme',dose:'2 tablet',slot:'gece',
+     what:'Kas gevşemesi, uyku kalitesi ve sinir sistemi için gereklidir. Kramplara karşı yardımcı olur. Bisglisinat formu mideyi rahatsız etmez.',
+     how:'2 tableti su ile yut. Çinkodan en az 2 saat ayrı al.',
+     when:'Her gün yatmadan 30–60 dk önce.'},
+    {id:'bar',emoji:'🍫',name:'Protein Bar',brand:'Muscle Station',dose:'en fazla 1 adet/gün',slot:'',optional:true,
+     what:'Whey içemediğin zamanlar (okul, dışarısı) için pratik ara öğün. Bir barda yaklaşık 12 g protein var.',
+     how:'Ara öğün olarak ye. Günde en fazla 1 tane, yemek yerine değil. İsteğe bağlıdır, günlük yüzdeye sayılmaz.',
+     when:'İhtiyaç olduğunda ara öğünde.'}
+  ]
+};
+const clone=o=>JSON.parse(JSON.stringify(o));
+let S=load();
+function load(){
+  try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.settings&&s.log)return s;}catch(e){}
+  return {settings:clone(DEFAULTS),log:{}};
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(S));}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const keyOf=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const dateOf=k=>{const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d);};
+const todayKey=()=>keyOf(new Date());
+const nowHM=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes());};
+const toMin=t=>{if(!t)return null;const [h,m]=t.split(':').map(Number);return h*60+m;};
+const slotById=id=>S.settings.slots.find(s=>s.id===id);
+const getLog=k=>S.log[k]||{taken:{},water:0};
+const ensureLog=k=>(S.log[k]=S.log[k]||{taken:{},water:0});
+function isTraining(k){const l=S.log[k];if(l&&typeof l.training==='boolean')return l.training;return S.settings.trainingDays.includes(dateOf(k).getDay());}
+function itemsFor(k,includeOptional){
+  return S.settings.items.filter(i=>{
+    if(i.active===false)return false;
+    if(i.optional)return !!includeOptional;
+    const s=slotById(i.slot);
+    if(s&&s.trainingOnly&&!isTraining(k))return false;
+    return true;
+  });
+}
+function dayStats(k){const req=itemsFor(k);const t=getLog(k).taken;const done=req.filter(i=>t[i.id]).length;return {done,total:req.length,pct:req.length?Math.round(done*100/req.length):0};}
+function hasData(k){const l=S.log[k];return !!(l&&(Object.keys(l.taken).length||l.water));}
+function streak(){
+  let d=new Date(),n=0;
+  if(dayStats(keyOf(d)).pct<100)d.setDate(d.getDate()-1);
+  for(let i=0;i<1000;i++){const s=dayStats(keyOf(d));if(s.total&&s.pct===100){n++;d.setDate(d.getDate()-1);}else break;}
+  return n;
+}
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2200);}
+
+/* ---------- BUGÜN ---------- */
+let viewKey=todayKey();
+function ringSVG(p,size=128,stroke=12){
+  const r=(size-stroke)/2,c=2*Math.PI*r,off=c*(1-p/100);
+  const col=p>=100?'#22c55e':p>=50?'#a3e635':'#f97316';
+  return `<svg width="${size}" height="${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="#263241" stroke-width="${stroke}" fill="none"/><circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="${col}" stroke-width="${stroke}" fill="none" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" style="transition:stroke-dashoffset .4s"/></svg>`;
+}
+function renderToday(){
+  const k=viewKey,isToday=k===todayKey(),d=dateOf(k);
+  $('pastBanner').innerHTML=isToday?'':`<div class="banner"><div>✏️ <b>${d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',weekday:'long'})}</b> düzenleniyor</div><button class="btn" id="backToday">Bugüne dön</button></div>`;
+  if(!isToday)$('backToday').onclick=()=>{viewKey=todayKey();renderToday();};
+  const st=dayStats(k);
+  $('ring').innerHTML=ringSVG(st.pct)+`<div class="lbl"><b>%${st.pct}</b><span class="muted small">${st.done}/${st.total}</span></div>`;
+  $('todayDate').textContent=isToday?'Bugün, '+d.toLocaleDateString('tr-TR',{day:'numeric',month:'long'}):d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+  $('todaySub').textContent=d.toLocaleDateString('tr-TR',{weekday:'long'})+(isTraining(k)?' · antrenman günü':' · dinlenme günü');
+  // sıradaki
+  let next='';
+  if(isToday){
+    const nm=toMin(nowHM()),log=getLog(k);
+    const pend=S.settings.slots.filter(s=>s.time&&(!s.trainingOnly||isTraining(k))&&itemsFor(k).some(i=>i.slot===s.id&&!log.taken[i.id])).sort((a,b)=>toMin(a.time)-toMin(b.time));
+    const late=pend.filter(s=>toMin(s.time)<=nm),up=pend.find(s=>toMin(s.time)>nm);
+    if(late.length)next=`⏰ Bekleyen: ${late.map(s=>s.name).join(', ')}`;
+    else if(up)next=`Sıradaki: ${up.name} · ${up.time}`;
+    else next=st.pct===100?'🎉 Bugünkü tüm takviyeler tamam!':'';
+  }
+  $('nextUp').textContent=next;
+  $('trainTgl').classList.toggle('on',isTraining(k));
+  $('trainSub').textContent='Açıkken antrenman sonrası whey listeye eklenir';
+  // su
+  const w=getLog(k).water||0,g=S.settings.waterGoal;
+  $('wL').textContent=(w*0.25).toLocaleString('tr-TR',{maximumFractionDigits:2})+' L';
+  $('wG').textContent=`${w} / ${g} bardak`;
+  $('waterTarget').textContent=`Hedef ${(g*0.25).toLocaleString('tr-TR')} L (2,5–3,5 L)`;
+  $('glasses').innerHTML=Array.from({length:Math.max(g,w)},(_,i)=>`<i class="${i<w?'f':''}"></i>`).join('');
+  // slotlar
+  const log=getLog(k),nm=toMin(nowHM());let html='';
+  for(const g of GROUPS){
+    const ss=S.settings.slots.filter(s=>s.group===g&&(!s.trainingOnly||isTraining(k))).sort((a,b)=>toMin(a.time)-toMin(b.time));
+    const blocks=ss.map(s=>{
+      const its=itemsFor(k).filter(i=>i.slot===s.id);if(!its.length)return '';
+      const allOk=its.every(i=>log.taken[i.id]);const due=isToday&&!allOk&&toMin(s.time)<=nm;
+      return `<div class="slot ${allOk?'done':due?'due':''}"><div class="slothd"><span>${esc(s.name)}${due?' <span class="tag">ZAMANI GELDİ</span>':''}</span><span class="t">${esc(s.time)}</span></div>${its.map(itemRow).join('')}</div>`;
+    }).join('');
+    if(blocks)html+=`<div class="grp">${g==='Sabah'?'🌅':g==='Öğle'?'☀️':g==='Akşam'?'🌆':'🌙'} ${g}</div>`+blocks;
+  }
+  const opt=itemsFor(k,true).filter(i=>i.optional);
+  if(opt.length)html+=`<div class="grp">➕ İsteğe bağlı</div><div class="slot"><div class="slothd"><span>Ara öğün · yüzdeye sayılmaz</span><span class="t">—</span></div>${opt.map(itemRow).join('')}</div>`;
+  $('slots').innerHTML=html;
+  function itemRow(i){
+    const t=log.taken[i.id];
+    return `<div class="item ${t?'ok':''}" data-id="${i.id}"><div class="cb">${t?'✓':''}</div><div class="nm"><b>${i.emoji||'💊'} ${esc(i.name)}</b><span>${esc(i.dose)}${i.brand?' · '+esc(i.brand):''}${t?` · <span style="color:var(--acc)">✔ ${esc(t)}</span>`:''}</span></div><button class="info" data-info="${i.id}" aria-label="Bilgi">i</button></div>`;
+  }
+  $('streakChip').textContent=`🔥 ${streak()} gün`;
+}
+$('slots').addEventListener('click',e=>{
+  const inf=e.target.closest('[data-info]');if(inf){showInfo(inf.dataset.info);return;}
+  const row=e.target.closest('.item');if(!row)return;
+  const k=viewKey,l=ensureLog(k),id=row.dataset.id;
+  if(l.taken[id])delete l.taken[id];else{l.taken[id]=k===todayKey()?nowHM():'sonradan';if(navigator.vibrate)navigator.vibrate(15);}
+  save();renderToday();cancelTriggered(k);
+  if(dayStats(k).pct===100&&l.taken[id])toast('🎉 Bugünün tüm takviyeleri tamam!');
+});
+$('trainToggle').onclick=()=>{const k=viewKey,l=ensureLog(k);l.training=!isTraining(k);save();renderToday();scheduleTriggers();};
+$('wPlus').onclick=()=>{const l=ensureLog(viewKey);l.water=(l.water||0)+1;save();renderToday();if(l.water===S.settings.waterGoal)toast('💧 Su hedefine ulaştın!');};
+$('wMinus').onclick=()=>{const l=ensureLog(viewKey);l.water=Math.max(0,(l.water||0)-1);save();renderToday();};
+
+/* ---------- BİLGİ ---------- */
+function showInfo(id){
+  const i=S.settings.items.find(x=>x.id===id);if(!i)return;const s=slotById(i.slot);
+  $('sheet').innerHTML=`<h2>${i.emoji||'💊'} ${esc(i.name)}</h2><p class="muted">${esc(i.brand)} · <b style="color:var(--txt)">${esc(i.dose)}</b>${s?` · ${esc(s.name)} ${esc(s.time)}`:''}</p>
+  <div class="sec"><b>Ne işe yarar?</b><p>${esc(i.what||'—')}</p></div>
+  <div class="sec"><b>Nasıl kullanılır?</b><p>${esc(i.how||'—')}</p></div>
+  <div class="sec"><b>Ne zaman?</b><p>${esc(i.when||'—')}</p></div>
+  <button class="btn pri full" onclick="closeModal()">Tamam</button>`;
+  $('modal').classList.add('on');
+}
+function closeModal(){$('modal').classList.remove('on');}
+$('modal').onclick=e=>{if(e.target.id==='modal')closeModal();};
+function renderGuide(){
+  $('guideList').innerHTML=S.settings.items.filter(i=>i.active!==false).map(i=>{const s=slotById(i.slot);return `<div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">${i.emoji||'💊'} ${esc(i.name)}</h2><span class="chip">${s?esc(s.time):'isteğe bağlı'}</span></div>
+  <p class="muted small">${esc(i.brand)} · ${esc(i.dose)}</p>
+  <p><b style="color:var(--acc)">Ne işe yarar:</b> ${esc(i.what||'—')}</p><p><b style="color:var(--acc)">Nasıl:</b> ${esc(i.how||'—')}</p><p><b style="color:var(--acc)">Ne zaman:</b> ${esc(i.when||'—')}</p></div>`;}).join('')+
+  `<div class="card"><h2>🎯 Günlük hedefler</h2><p>• Protein: <b>140–160 g</b> (yemek + 2 ölçek whey)<br>• Kalori: <b>~3.000–3.100 kcal</b><br>• Su: <b>2,5–3,5 L</b><br>• Uyku: <b>7–9 saat</b><br>• Antrenman: haftada 4 gün ağırlık</p><p class="muted small">Bir sağlık sorunun ya da düzenli kullandığın ilaç varsa doktoruna danış. Yan etki görürsen kullanmayı bırak.</p></div>`;
+}
+
+/* ---------- AYLIK ---------- */
+let mY=new Date().getFullYear(),mM=new Date().getMonth();
+function monthDays(y,m){return new Date(y,m+1,0).getDate();}
+function renderMonth(){
+  const first=new Date(mY,mM,1),n=monthDays(mY,mM),tk=todayKey();
+  $('mTitle').textContent=first.toLocaleDateString('tr-TR',{month:'long',year:'numeric'});
+  let h=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'].map(x=>`<div class="h">${x}</div>`).join('');
+  const lead=(first.getDay()+6)%7;h+='<div></div>'.repeat(lead);
+  for(let d=1;d<=n;d++){
+    const k=keyOf(new Date(mY,mM,d)),fut=k>tk,st=dayStats(k);
+    let cls='';if(!fut&&(hasData(k)||k<tk)){cls=st.pct>=100?'p4':st.pct>=75?'p3':st.pct>=50?'p2':st.pct>0?'p1':'p0';}
+    h+=`<div class="d ${cls} ${fut?'fut':''} ${k===tk?'today':''}" data-k="${k}">${isTraining(k)?'<span class="tr"></span>':''}${d}${!fut&&(hasData(k)||k<=tk)?`<small>%${st.pct}</small>`:''}</div>`;
+  }
+  $('cal').innerHTML=h;
+  // özet
+  const ks=[];for(let d=1;d<=n;d++){const k=keyOf(new Date(mY,mM,d));if(k<=tk)ks.push(k);}
+  const avg=ks.length?Math.round(ks.reduce((a,k)=>a+dayStats(k).pct,0)/ks.length):0;
+  const full=ks.filter(k=>dayStats(k).pct===100).length;
+  let best=0,cur=0;for(const k of ks){if(dayStats(k).pct===100){cur++;best=Math.max(best,cur);}else cur=0;}
+  const wAvg=ks.length?(ks.reduce((a,k)=>a+(getLog(k).water||0),0)*0.25/ks.length):0;
+  const tr=ks.filter(k=>isTraining(k)).length;
+  $('mStats').innerHTML=[['%'+avg,'ortalama'],[full+'/'+ks.length,'tam gün'],[streak()+' 🔥','güncel seri'],[best,'ayın en iyi serisi'],[wAvg.toLocaleString('tr-TR',{maximumFractionDigits:1})+' L','ort. su'],[tr,'antrenman günü']].map(([a,b])=>`<div class="stat"><b>${a}</b><span class="muted small">${b}</span></div>`).join('');
+  // takviye bazında
+  $('mSup').innerHTML=S.settings.items.filter(i=>i.active!==false).map(i=>{
+    let req=0,tk2=0;for(const k of ks){const inc=itemsFor(k,true).some(x=>x.id===i.id);if(inc){req++;if(getLog(k).taken[i.id])tk2++;}}
+    if(i.optional)return `<div class="sup"><div class="row"><b>${i.emoji} ${esc(i.name)}</b><span class="muted">${tk2} adet</span></div></div>`;
+    const p=req?Math.round(tk2*100/req):0;
+    return `<div class="sup"><div class="row"><b>${i.emoji||'💊'} ${esc(i.name)}</b><span class="muted">${tk2}/${req} · %${p}</span></div><div class="bar"><i style="width:${p}%;background:${p>=90?'var(--acc2)':p>=60?'var(--acc)':'var(--org)'}"></i></div></div>`;
+  }).join('');
+}
+$('cal').onclick=e=>{const d=e.target.closest('.d');if(!d||d.classList.contains('fut'))return;viewKey=d.dataset.k;go('today');};
+$('mPrev').onclick=()=>{mM--;if(mM<0){mM=11;mY--;}renderMonth();};
+$('mNext').onclick=()=>{mM++;if(mM>11){mM=0;mY++;}renderMonth();};
+function monthMatrix(){
+  const n=monthDays(mY,mM),its=S.settings.items.filter(i=>i.active!==false);
+  const days=Array.from({length:n},(_,i)=>keyOf(new Date(mY,mM,i+1)));
+  return {n,its,days};
+}
+$('printBtn').onclick=()=>{
+  const {n,its,days}=monthMatrix();const tk=todayKey();
+  const cell=(i,k)=>{if(k>tk)return '';const inc=itemsFor(k,true).some(x=>x.id===i.id);if(!inc)return '–';return getLog(k).taken[i.id]?'✓':(i.optional||k===tk?'':'✗');};
+  let t=`<h1>Takviyem · ${new Date(mY,mM,1).toLocaleDateString('tr-TR',{month:'long',year:'numeric'})} takip çizelgesi</h1><p style="font-size:11px;margin:0 0 6px">✓ alındı · ✗ alınmadı · – o gün gerekmiyor · A = antrenman günü</p><table><tr><th>Takviye</th>${days.map((k,i)=>`<th>${i+1}<br>${DOW[dateOf(k).getDay()]}${isTraining(k)?'<br>A':''}</th>`).join('')}</tr>`;
+  for(const i of its)t+=`<tr><td class="n">${esc(i.name)} (${esc(i.dose.split('·')[0])})${slotById(i.slot)?' '+slotById(i.slot).time:''}</td>${days.map(k=>`<td>${cell(i,k)}</td>`).join('')}</tr>`;
+  t+=`<tr><td class="n">Su (bardak)</td>${days.map(k=>`<td>${k<=tk?(getLog(k).water||0):''}</td>`).join('')}</tr>`;
+  t+=`<tr><td class="n">Günlük %</td>${days.map(k=>`<td>${k<=tk?dayStats(k).pct:''}</td>`).join('')}</tr></table>`;
+  $('printSheet').innerHTML=t;setTimeout(()=>window.print(),50);
+};
+function download(name,text,type){
+  const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},1500);
+}
+$('csvBtn').onclick=()=>{
+  const {its,days}=monthMatrix();
+  let c='\ufeffTarih;Gün;Antrenman;'+its.map(i=>i.name).join(';')+';Su (bardak);Yüzde\n';
+  for(const k of days){const l=getLog(k);c+=[k,DOW[dateOf(k).getDay()],isTraining(k)?'Evet':'Hayır',...its.map(i=>l.taken[i.id]||''),l.water||0,dayStats(k).pct].join(';')+'\n';}
+  download(`takviyem-${mY}-${pad(mM+1)}.csv`,c,'text/csv');
+};
+
+/* ---------- BİLDİRİMLER ---------- */
+let swReg=null;
+function notifSupported(){return 'Notification' in window;}
+function getNotified(){try{return JSON.parse(localStorage.getItem(NKEY))||{};}catch(e){return {};}}
+async function notify(title,body,tag){
+  const opt={body,tag,icon:'icons/icon-192.png',badge:'icons/icon-192.png',renotify:true,vibrate:[200,100,200],data:{url:'./'}};
+  try{if(swReg)return await swReg.showNotification(title,opt);}catch(e){}
+  try{new Notification(title,opt);}catch(e){}
+}
+function pendingFor(k,s){const l=getLog(k);return itemsFor(k).filter(i=>i.slot===s.id&&!l.taken[i.id]);}
+function checkReminders(){
+  if(!notifSupported()||Notification.permission!=='granted')return;
+  const k=todayKey(),nm=toMin(nowHM()),F=Number(S.settings.followMin)||0;
+  const N=getNotified();const sent=N[k]=N[k]||{};
+  for(const s of S.settings.slots){
+    if(!s.time||(s.trainingOnly&&!isTraining(k)))continue;
+    const p=pendingFor(k,s);if(!p.length)continue;const t=toMin(s.time);
+    const list=p.map(i=>`${i.name} (${i.dose.split('·')[0].trim()})`).join(', ');
+    if(nm>=t&&nm<t+90&&!sent[s.id+':1']){sent[s.id+':1']=1;notify(`💊 ${s.name} zamanı · ${s.time}`,list,'slot-'+s.id);}
+    else if(F&&nm>=t+F&&nm<t+F+90&&!sent[s.id+':2']){sent[s.id+':2']=1;notify(`⏰ Unutma: ${s.name}`,`Hâlâ işaretlenmedi: ${list}`,'slot-'+s.id);}
+  }
+  for(const d of Object.keys(N))if(d<k)delete N[d];
+  localStorage.setItem(NKEY,JSON.stringify(N));
+}
+// Notification Triggers (bazı Android Chrome sürümlerinde): uygulama kapalıyken de zamanlanmış bildirim
+const hasTriggers=()=>typeof window.TimestampTrigger!=='undefined'&&'showTrigger' in Notification.prototype;
+async function scheduleTriggers(){
+  if(!swReg||!hasTriggers()||Notification.permission!=='granted')return;
+  try{
+    const old=await swReg.getNotifications({includeTriggered:true});old.filter(n=>n.tag&&n.tag.startsWith('trg-')).forEach(n=>n.close());
+    const now=Date.now(),F=Number(S.settings.followMin)||0;
+    for(let off=0;off<3;off++){
+      const d=new Date();d.setDate(d.getDate()+off);const k=keyOf(d);
+      for(const s of S.settings.slots){
+        if(!s.time||(s.trainingOnly&&!isTraining(k))||!pendingFor(k,s).length)continue;
+        const [h,m]=s.time.split(':').map(Number);const ts=new Date(d.getFullYear(),d.getMonth(),d.getDate(),h,m).getTime();
+        const list=pendingFor(k,s).map(i=>i.name).join(', ');
+        if(ts>now)await swReg.showNotification(`💊 ${s.name} zamanı · ${s.time}`,{body:list,tag:`trg-${k}-${s.id}-1`,icon:'icons/icon-192.png',showTrigger:new TimestampTrigger(ts)});
+        if(F&&ts+F*60000>now)await swReg.showNotification(`⏰ Unutma: ${s.name}`,{body:'İşaretlemeyi unutma: '+list,tag:`trg-${k}-${s.id}-2`,icon:'icons/icon-192.png',showTrigger:new TimestampTrigger(ts+F*60000)});
+      }
+    }
+  }catch(e){console.warn(e);}
+}
+async function cancelTriggered(k){
+  if(!swReg||!hasTriggers())return;
+  try{const ns=await swReg.getNotifications({includeTriggered:true});
+    for(const s of S.settings.slots){if(!pendingFor(k,s).length)ns.filter(n=>n.tag&&n.tag.startsWith(`trg-${k}-${s.id}`)).forEach(n=>n.close());}}catch(e){}
+}
+function renderNotifStatus(){
+  const st=$('notifStatus'),b=$('notifBtn');
+  const standalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(!notifSupported()){st.innerHTML=ios&&!standalone?'⚠️ iPhone\'da bildirimler için önce uygulamayı <b>Ana Ekrana Ekle</b> ile kur ve oradan aç (iOS 16.4+). Kesin hatırlatma için aşağıdaki <b>Takvime ekle</b>\'yi kullan.':'⚠️ Bu tarayıcı bildirimleri desteklemiyor. Aşağıdaki <b>Takvime ekle</b>\'yi kullan.';b.disabled=true;b.style.opacity=.5;return;}
+  const p=Notification.permission;
+  st.innerHTML=p==='granted'?`✅ Bildirimler açık. Uygulama açıkken/arka plandayken öğün saatinde ve ${S.settings.followMin} dk sonra hatırlatır.${hasTriggers()?' Bu cihaz zamanlanmış bildirimleri de destekliyor.':''} Uygulama tamamen kapalıyken hatırlatma için takvim alarmlarını ekle.`:p==='denied'?'❌ Bildirim izni reddedilmiş. Telefon ayarlarından bu uygulamaya bildirim izni verebilirsin.':'Bildirimler kapalı. Açmak için düğmeye dokun.';
+  b.textContent=p==='granted'?'Bildirimler açık ✓':'Bildirimlere izin ver';
+}
+$('notifBtn').onclick=async()=>{if(!notifSupported())return;const r=await Notification.requestPermission();renderNotifStatus();if(r==='granted'){toast('🔔 Bildirimler açıldı');scheduleTriggers();checkReminders();}};
+$('testNotif').onclick=async()=>{if(!notifSupported()||Notification.permission!=='granted'){toast('Önce bildirimlere izin ver');return;}await notify('💊 Takviyem','Deneme bildirimi: hatırlatmalar çalışıyor!','test');};
+
+/* ---------- TAKVİM (.ics) ---------- */
+function foldLine(line){
+  const enc=new TextEncoder();let out='',cur='',n=0;
+  for(const ch of line){const b=enc.encode(ch).length;if(n+b>73){out+=cur+'\r\n ';cur='';n=1;}cur+=ch;n+=b;}
+  return out+cur;
+}
+const icsEsc=s=>String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+function buildICS(){
+  const d=new Date(),ds=`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+  const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+  const BY=['SU','MO','TU','WE','TH','FR','SA'],F=Number(S.settings.followMin)||0;
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Takviyem//TR','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Takviyem','X-WR-TIMEZONE:Europe/Istanbul',
+    'BEGIN:VTIMEZONE','TZID:Europe/Istanbul','BEGIN:STANDARD','DTSTART:19700101T000000','TZOFFSETFROM:+0300','TZOFFSETTO:+0300','TZNAME:+03','END:STANDARD','END:VTIMEZONE'];
+  for(const s of S.settings.slots){
+    if(!s.time)continue;
+    const its=S.settings.items.filter(i=>i.active!==false&&!i.optional&&i.slot===s.id);if(!its.length)continue;
+    const [h,m]=s.time.split(':');
+    const list=its.map(i=>`${i.name} – ${i.dose}`).join(', ');
+    const desc=its.map(i=>`• ${i.name}: ${i.dose}. ${i.when||''}`).join('\n')+'\n\nAldıktan sonra Takviyem uygulamasında işaretle.';
+    L.push('BEGIN:VEVENT',`UID:takviyem-${s.id}@takviyem.app`,`DTSTAMP:${stamp}`,`DTSTART;TZID=Europe/Istanbul:${ds}T${h}${m}00`,'DURATION:PT10M',
+      s.trainingOnly?`RRULE:FREQ=WEEKLY;BYDAY=${S.settings.trainingDays.map(x=>BY[x]).join(',')}`:'RRULE:FREQ=DAILY',
+      `SUMMARY:${icsEsc('💊 '+s.name+': '+list)}`,`DESCRIPTION:${icsEsc(desc)}`,'TRANSP:TRANSPARENT',
+      'BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${icsEsc(s.name+' takviyeleri')}`,'TRIGGER:PT0M','END:VALARM');
+    if(F)L.push('BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${icsEsc('Unutma: '+s.name)}`,`TRIGGER:PT${F}M`,'END:VALARM');
+    L.push('END:VEVENT');
+  }
+  L.push('END:VCALENDAR');
+  return L.map(foldLine).join('\r\n')+'\r\n';
+}
+$('icsBtn').onclick=()=>{
+  const txt=buildICS();
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(ios){ // iOS: data URL'yi açınca Takvim "Tümünü Ekle" ekranı gelir
+    const url='data:text/calendar;charset=utf-8,'+encodeURIComponent(txt);
+    window.location.href=url;
+  }else download('takviyem.ics',txt,'text/calendar');
+  toast('📅 Takvim dosyası açılıyor… "Tümünü Ekle"');
+};
+
+/* ---------- AYARLAR ---------- */
+function renderSettings(){
+  renderNotifStatus();
+  $('followMin').value=S.settings.followMin;
+  $('waterGoal').value=S.settings.waterGoal;
+  $('trainDays').innerHTML=[1,2,3,4,5,6,0].map(d=>`<button data-d="${d}" class="${S.settings.trainingDays.includes(d)?'on':''}">${DOW[d]}</button>`).join('');
+  $('slotEd').innerHTML=S.settings.slots.map(s=>`<div class="ed row" style="justify-content:space-between"><div><b>${esc(s.name)}</b><div class="muted small">${s.group}${s.trainingOnly?' · sadece antrenman günleri':''}</div></div><input type="time" data-slot="${s.id}" value="${esc(s.time)}"></div>`).join('');
+  const opts=sel=>`<option value="">İsteğe bağlı (saatsiz)</option>`+S.settings.slots.map(s=>`<option value="${s.id}" ${s.id===sel?'selected':''}>${esc(s.name)} ${s.time}</option>`).join('');
+  $('itemEd').innerHTML=S.settings.items.map(i=>`<div class="ed" data-item="${i.id}">
+    <div class="row" style="justify-content:space-between"><b>${i.emoji||'💊'} ${esc(i.name)}</b><div class="switch" data-act="${i.id}" style="min-height:44px"><span class="muted small">${i.active===false?'Kapalı':'Aktif'}</span><div class="tgl ${i.active===false?'':'on'}"></div></div></div>
+    <label class="f">Ad</label><input data-f="name" value="${esc(i.name)}">
+    <div class="grid2"><div><label class="f">Doz</label><input data-f="dose" value="${esc(i.dose)}"></div><div><label class="f">Marka</label><input data-f="brand" value="${esc(i.brand)}"></div></div>
+    <label class="f">Zaman</label><select data-f="slot">${opts(i.slot)}</select>
+    ${i.custom?`<label class="f">Not (ne işe yarar / nasıl)</label><textarea data-f="how" rows="2">${esc(i.how||'')}</textarea><button class="btn full danger" data-del="${i.id}">Ürünü sil</button>`:''}
+  </div>`).join('');
+}
+$('trainDays').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=+b.dataset.d,a=S.settings.trainingDays;const ix=a.indexOf(d);ix>=0?a.splice(ix,1):a.push(d);save();renderSettings();scheduleTriggers();};
+$('slotEd').onchange=e=>{const s=slotById(e.target.dataset.slot);if(s&&e.target.value){s.time=e.target.value;save();resetNotifiedToday();scheduleTriggers();toast('Saat kaydedildi. Takvimi yeniden eklemeyi unutma.');}};
+$('itemEd').onchange=e=>{const box=e.target.closest('[data-item]'),f=e.target.dataset.f;if(!box||!f)return;const i=S.settings.items.find(x=>x.id===box.dataset.item);i[f]=e.target.value;if(f==='slot')i.optional=!e.target.value;save();toast('Kaydedildi');if(f==='name'||f==='slot')renderSettings();};
+$('itemEd').onclick=e=>{
+  const a=e.target.closest('[data-act]');if(a){const i=S.settings.items.find(x=>x.id===a.dataset.act);i.active=i.active===false;save();renderSettings();return;}
+  const d=e.target.closest('[data-del]');if(d&&confirm('Bu ürün silinsin mi?')){S.settings.items=S.settings.items.filter(x=>x.id!==d.dataset.del);save();renderSettings();}
+};
+$('addItem').onclick=()=>{const name=prompt('Ürün adı?');if(!name)return;const id='u'+Date.now();S.settings.items.push({id,emoji:'💊',name,brand:'',dose:'1 adet',slot:'kahvalti',custom:true,what:'',how:'',when:''});save();renderSettings();toast('Eklendi, aşağıdan saatini seç');};
+$('followMin').onchange=e=>{S.settings.followMin=Math.max(0,Math.min(180,+e.target.value||0));save();scheduleTriggers();renderNotifStatus();};
+$('waterGoal').onchange=e=>{S.settings.waterGoal=Math.max(4,Math.min(20,+e.target.value||12));save();};
+$('expBtn').onclick=()=>download(`takviyem-yedek-${todayKey()}.json`,JSON.stringify(S,null,1),'application/json');
+$('impBtn').onclick=()=>$('impFile').click();
+$('impFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.settings||!d.log)throw 0;if(confirm('Mevcut veriler yedektekiyle değiştirilsin mi?')){S=d;save();renderAll();toast('✅ Yedek geri yüklendi');}}catch(_){alert('Geçersiz yedek dosyası');}};r.readAsText(f);e.target.value='';};
+$('resetBtn').onclick=()=>{if(confirm('Ürünler, saatler ve antrenman günleri varsayılana dönsün mü? (Takip geçmişin silinmez)')){S.settings=clone(DEFAULTS);save();renderAll();toast('Varsayılana döndü');}};
+function resetNotifiedToday(){const N=getNotified();delete N[todayKey()];localStorage.setItem(NKEY,JSON.stringify(N));}
+
+/* ---------- GEZİNME ---------- */
+function go(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  if(v==='today')renderToday();if(v==='month')renderMonth();if(v==='guide')renderGuide();if(v==='settings')renderSettings();
+  window.scrollTo(0,0);
+}
+document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.v==='today')viewKey=todayKey();go(b.dataset.v);};
+function renderAll(){renderToday();renderMonth();renderGuide();renderSettings();}
+let lastDay=todayKey();
+function tick(){const k=todayKey();if(k!==lastDay){if(viewKey===lastDay)viewKey=k;lastDay=k;scheduleTriggers();}
+  if(document.getElementById('v-today').classList.contains('on'))renderToday();checkReminders();}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick();});
+setInterval(tick,30000);
+if(location.hash.length>1)go(location.hash.slice(1));else renderToday();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(r=>navigator.serviceWorker.ready).then(r=>{swReg=r;checkReminders();scheduleTriggers();}).catch(e=>console.warn('SW',e));}
+</script>
+</body>
+</html>

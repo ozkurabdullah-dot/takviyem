@@ -1,0 +1,131 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Takviyem//TR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Takviyem
+X-WR-TIMEZONE:Europe/Istanbul
+BEGIN:VTIMEZONE
+TZID:Europe/Istanbul
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0300
+TZOFFSETTO:+0300
+TZNAME:+03
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:takviyem-kahvalti@takviyem.app
+DTSTAMP:20261009T103000Z
+DTSTART;TZID=Europe/Istanbul:20261009T080000
+DURATION:PT10M
+RRULE:FREQ=DAILY
+SUMMARY:💊 Kahvaltı: Kreatin – 5 g (1 ölçek)\, D3 + K2 – 1 table
+ t\, Omega-3 – 1 kapsül
+DESCRIPTION:• Kreatin: 5 g (1 ölçek). Her gün kahvaltıda\, dinlenme
+  günleri dahil. Saati önemli değil\, önemli olan her gün almak.\n
+ • D3 + K2: 1 tablet. Her gün kahvaltıda\, omega-3 ile birlikte (yağ
+  emilimi artırır).\n• Omega-3: 1 kapsül. Her gün kahvaltıda.\n\nA
+ ldıktan sonra Takviyem uygulamasında işaretle.
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Kahvaltı takviyeleri
+TRIGGER:PT0M
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Unutma: Kahvaltı
+TRIGGER:PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:takviyem-ara@takviyem.app
+DTSTAMP:20261009T103000Z
+DTSTART;TZID=Europe/Istanbul:20261009T103000
+DURATION:PT10M
+RRULE:FREQ=DAILY
+SUMMARY:💊 Ara öğün: Whey Protein – 1 ölçek · 250–300 ml su/s
+ üt
+DESCRIPTION:• Whey Protein: 1 ölçek · 250–300 ml su/süt. Her gün
+  10:30 ara öğünde. Antrenman günlerinde antrenmandan sonra 1 ölçek
+  daha.\n\nAldıktan sonra Takviyem uygulamasında işaretle.
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Ara öğün takviyeleri
+TRIGGER:PT0M
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Unutma: Ara öğün
+TRIGGER:PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:takviyem-antrenman@takviyem.app
+DTSTAMP:20261009T103000Z
+DTSTART;TZID=Europe/Istanbul:20261009T190000
+DURATION:PT10M
+RRULE:FREQ=WEEKLY;BYDAY=MO,TU,TH,FR
+SUMMARY:💊 Antrenman sonrası: Whey (antrenman sonrası) – 1 ölçek 
+ · 250–300 ml su/süt
+DESCRIPTION:• Whey (antrenman sonrası): 1 ölçek · 250–300 ml su/s
+ üt. Sadece antrenman günlerinde (varsayılan Pzt\, Sal\, Per\, Cum)\, 
+ antrenmandan sonra.\n\nAldıktan sonra Takviyem uygulamasında işaretle
+ .
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Antrenman sonrası takviyeleri
+TRIGGER:PT0M
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Unutma: Antrenman sonrası
+TRIGGER:PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:takviyem-aksam@takviyem.app
+DTSTAMP:20261009T103000Z
+DTSTART;TZID=Europe/Istanbul:20261009T200000
+DURATION:PT10M
+RRULE:FREQ=DAILY
+SUMMARY:💊 Akşam yemeği: Çinko Pikolinat – 1 tablet
+DESCRIPTION:• Çinko Pikolinat: 1 tablet. Her gün akşam yemeğinde.\n
+ \nAldıktan sonra Takviyem uygulamasında işaretle.
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Akşam yemeği takviyeleri
+TRIGGER:PT0M
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Unutma: Akşam yemeği
+TRIGGER:PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:takviyem-gece@takviyem.app
+DTSTAMP:20261009T103000Z
+DTSTART;TZID=Europe/Istanbul:20261009T230000
+DURATION:PT10M
+RRULE:FREQ=DAILY
+SUMMARY:💊 Yatmadan önce: Magnezyum Bisglisinat – 2 tablet
+DESCRIPTION:• Magnezyum Bisglisinat: 2 tablet. Her gün yatmadan 30–6
+ 0 dk önce.\n\nAldıktan sonra Takviyem uygulamasında işaretle.
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Yatmadan önce takviyeleri
+TRIGGER:PT0M
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Unutma: Yatmadan önce
+TRIGGER:PT30M
+END:VALARM
+END:VEVENT
+END:VCALENDAR
